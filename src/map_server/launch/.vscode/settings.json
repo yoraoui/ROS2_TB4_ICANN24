@@ -1,0 +1,26 @@
+{
+    "python.autoComplete.extraPaths": [
+        "/home/raoui/ros21_ws/install/nav2_new_features/lib/python3.10/site-packages",
+        "/home/raoui/ros21_ws/install/localization_server/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/mapping",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/nn",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/Utils",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/nn/ratslam",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/nn/RatInABox-dev/"
+    ],
+    "python.analysis.extraPaths": [
+        "/home/raoui/ros21_ws/install/nav2_new_features/lib/python3.10/site-packages",
+        "/home/raoui/ros21_ws/install/localization_server/lib/python3.10/site-packages",
+        "/opt/ros/humble/lib/python3.10/site-packages",
+        "/opt/ros/humble/local/lib/python3.10/dist-packages",
+        "",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/mapping",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/nn",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/Utils",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/nn/ratslam",
+        "/home/raoui/catkin_cesame/src/cesame/src/src/cesame_modules/nn/RatInABox-dev/"
+    ]
+}
