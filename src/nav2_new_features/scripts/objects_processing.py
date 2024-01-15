@@ -12,6 +12,8 @@ import cv2
 import numpy as np
 import os
 
+
+
 # Load Yolo
 net = cv2.dnn.readNet("scripts/yolov3.weights", "scripts/yolov3.cfg")
 
