@@ -1,4 +1,5 @@
 import rclpy
+import cv2
 from rclpy.node import Node
 from geometry_msgs.msg import PoseWithCovarianceStamped
 from scipy.spatial.transform import Rotation as R
@@ -8,6 +9,11 @@ from rclpy.qos import QoSProfile, ReliabilityPolicy
 from datetime import datetime
 import matplotlib.pyplot as plt
 import os
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
+import time
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge
 class PoseSubscriber(Node):
     def __init__(self):
         super().__init__('pose_subscriber')
@@ -22,8 +28,29 @@ class PoseSubscriber(Node):
             '/amcl_pose',
             self.pose_callback,
             qos)
+        
+        self.bridge = CvBridge()
+
+        self.color_subscriber = self.create_subscription(
+            Image,
+            '/color/preview/image',
+            self.color_callback,
+            10)
+        self.depth_subscriber = self.create_subscription(
+            Image,
+            '/stereo/depth',
+            self.depth_callback,
+            10)
+
+        # Create directories if they don't exist
+        os.makedirs('rgb_images', exist_ok=True)
+        os.makedirs('depth_images', exist_ok=True)
+
         self.latest_velocity = None
         self.latest_pose = None
+        self.latest_rgb_img = None
+        self.latest_depth_img = None
+        
         self.experience_dir = os.path.join('experiences', datetime.now().strftime('%Y_%m_%d_%H_%M_%S'))
         os.makedirs(self.experience_dir, exist_ok=True)
         # Create a timer callback that calls process_data every 0.5 seconds
@@ -36,7 +63,8 @@ class PoseSubscriber(Node):
     def pose_callback(self, msg):
         self.latest_pose = msg.pose.pose
     def process_data(self):
-        if self.latest_velocity is not None and self.latest_pose is not None:
+        if self.latest_velocity is not None and self.latest_pose is not None and self.latest_depth_img is not None\
+            and self.latest_rgb_img is not None:
             current_time = datetime.now()
             timestamp = current_time.timestamp()
             # Process the latest velocity and pose data
@@ -72,7 +100,7 @@ class PoseSubscriber(Node):
             homogeneous_transformation_odom[:3, :3] = rotation_matrix_odom
             homogeneous_transformation_odom[:3, 3] = translation_vector_odom
             flattened_transformation_odom = homogeneous_transformation_odom[:3, :].flatten()
-            with open(os.path.join(self.experience_dir, 'orientation_z.txt'), 'ab') as f:
+            with open(os.path.join(self.experience_dir, 'headings.txt'), 'ab') as f:
                 np.savetxt(f, [orientation.z], fmt='%.6f')
             with open(os.path.join(self.experience_dir, 'times.txt'), 'ab') as f:
                 np.savetxt(f, [timestamp], fmt='%.6f')
@@ -82,6 +110,19 @@ class PoseSubscriber(Node):
                 np.savetxt(f, flattened_transformation[None, :], fmt='%.6f')
             with open(os.path.join(self.experience_dir, 'poses_odom.txt'), 'ab') as f:
                 np.savetxt(f, flattened_transformation_odom[None, :], fmt='%.6f')
+                # Create directories if they don't exist
+            os.makedirs(f'{self.experience_dir}/rgb_images', exist_ok=True)
+            os.makedirs(f'{self.experience_dir}/depth_images', exist_ok=True)
+            timestamp = time.time()
+            cv2.imwrite(f'{self.experience_dir}/rgb_images/color_image_{timestamp}.jpg', self.latest_rgb_img)  # Save the color image            timestamp = time.time()
+            cv2.imwrite(f'{self.experience_dir}/depth_images/depth_image_{timestamp}.jpg', self.latest_depth_img)  # Save the depth image
+     
+                
+    def color_callback(self, msg):
+        self.latest_rgb_img = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
+        
+    def depth_callback(self, msg):
+        self.latest_depth_img = self.bridge.imgmsg_to_cv2(msg, '32FC1')
 def main(args=None):
     rclpy.init(args=args)
     pose_subscriber = PoseSubscriber()
